@@ -10,18 +10,22 @@
   <div class="main-container">
     <h1>Xhaos Fractal Drawer</h1>
 
-    <div class="fractal-flex">
-      <canvas id="chaosCanvas"></canvas>
-
-      <div id="infoContainer" class="info-container">
-        <h2 id="fractName">Select a Fractal</h2>
-        <div id="fractDesc">Choose a fractal from the tabs below to start exploring.</div>
-        <div id="formulas"></div>
+    <div class="content-container">
+      <div class="fractal-container">
+        <canvas id="chaosCanvas"></canvas>
+      </div>
+      
+      <div class="description-container">
+        <div id="infoContainer" class="info-container">
+          <h2 id="fractName">Select a Fractal</h2>
+          <div id="fractDesc">Choose a fractal from the tabs below to start exploring.</div>
+          <div id="formulas"></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="tabContainer" class="tabs"></div>
+    <div id="tabContainer" class="tabs"></div>
+  </div>
 
   <script src="script.js"></script>
 </body>
