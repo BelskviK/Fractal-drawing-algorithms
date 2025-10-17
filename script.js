@@ -4,23 +4,26 @@ const fractName = document.getElementById('fractName');
 const fractDesc = document.getElementById('fractDesc');
 const formulasDiv = document.getElementById('formulas');
 const tabContainer = document.getElementById('tabContainer');
+const logo = document.getElementById('logo');
 
 canvas.width = 500;
 canvas.height = 500;
-
 let fractals = [];
-let animationId;
+let animationId = null;
 
-// Load fractals JSON
+logo.addEventListener('click', () => location.reload());
+
+// Load JSON
 fetch('fractals.json')
-  .then(res => res.json())
+  .then(r => r.json())
   .then(data => {
     fractals = data.fractals;
     createTabs();
     loadFractal(fractals[0]);
-  });
+  })
+  .catch(err => alert("Failed to load fractals.json: " + err.message));
 
-// Tabs
+// Create tabs dynamically
 function createTabs() {
   fractals.forEach(fractal => {
     const tab = document.createElement('div');
@@ -36,45 +39,79 @@ function createTabs() {
   tabContainer.firstChild.classList.add('active');
 }
 
-// Load fractal by type
+// Load and draw fractal
 function loadFractal(fractal) {
-  cancelAnimationFrame(animationId);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  fractName.textContent = fractal.name;
-  fractDesc.textContent = fractal.description;
-  formulasDiv.innerHTML = fractal.formulas.map(f => `<code>${f}</code>`).join('');
+  try {
+    cancelAnimationFrame(animationId);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    fractName.textContent = fractal.name;
+    fractDesc.textContent = fractal.description;
+    formulasDiv.innerHTML = fractal.formulas.map(f => `<code>${f}</code>`).join('');
 
-  switch (fractal.type) {
-    case 'chaosGame':
-      drawChaosGame(fractal);
-      break;
-    case 'fern':
-      drawFern();
-      break;
-    case 'koch':
-      drawKochSnowflake();
-      break;
-    case 'dragon':
-      drawDragonCurve();
-      break;
-    case 'tree':
-      drawPythagorasTree();
-      break;
-    case 'hilbert':
-      drawHilbertCurve();
-      break;
-    case 'mandelbrot':
-      drawMandelbrot();
-      break;
+    if (fractal.type === "chaosGame") drawChaosGame(fractal);
+    else if (fractal.type === "chaosAffine") drawAffine(fractal);
+    else alert("Unsupported fractal type: " + fractal.type);
+  } catch (err) {
+    alert("Error drawing fractal: " + err.message);
   }
 }
 
-// === CHAOS GAME (Triangle/Square) ===
+// === Chaos Game ===
 function drawChaosGame(fractal) {
-  const width = canvas.width, height = canvas.height;
-  const points = fractal.vertices.map(v => ({
-    x: v.xRatio * width,
-    y: v.yRatio * height
+  const w = canvas.width, h = canvas.height;
+  const points = fractal.vertices.map(v => ({ x: v.xRatio * w, y: v.yRatio * h }));
+  let p = { x: Math.random() * w, y: Math.random() * h };
+  let last = -1;
+  const ratio = fractal.ratio || 0.5;
+
+  function step() {
+    try {
+      for (let i = 0; i < 1000; i++) {
+        let idx;
+        do { idx = Math.floor(Math.random() * points.length); }
+        while (fractal.skipRepeat && idx === last);
+        last = idx;
+
+        const t = points[idx];
+        p.x = (p.x * (1 - ratio)) + (t.x * ratio);
+        p.y = (p.y * (1 - ratio)) + (t.y * ratio);
+
+        ctx.fillStyle = '#66fcf1';
+        ctx.fillRect(p.x, p.y, 1, 1);
+      }
+      animationId = requestAnimationFrame(step);
+    } catch (err) {
+      alert("Chaos drawing failed: " + err.message);
+    }
+  }
+  step();
+}
+
+// === Chaos Affine (Fern) ===
+function drawAffine(fractal) {
+  const rules = fractal.affineRules;
+  let x = 0, y = 0;
+  function iter() {
+    try {
+      for (let i = 0; i < 2000; i++) {
+        const r = Math.random();
+        let sum = 0;
+        let rule = rules.find(rule => (sum += rule.p) >= r);
+        const nx = rule.a * x + rule.b * y + rule.e;
+        const ny = rule.c * x + rule.d * y + rule.f;
+        x = nx; y = ny;
+        ctx.fillStyle = '#66fcf1';
+        const px = canvas.width / 2 + x * 50;
+        const py = canvas.height - y * 50;
+        ctx.fillRect(px, py, 1, 1);
+      }
+      animationId = requestAnimationFrame(iter);
+    } catch (err) {
+      alert("Affine chaos failed: " + err.message);
+    }
+  }
+  iter();
+}    y: v.yRatio * height
   }));
   let p = { x: Math.random() * width, y: Math.random() * height };
   let last = -1;
