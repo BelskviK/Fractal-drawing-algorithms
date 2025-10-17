@@ -9,14 +9,16 @@ body {
   color: #c5c6c7;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  height: full;
+  height: 100%;
+  min-height: 100vh;
   overflow: hidden;
 }
 
 .main-container {
   display: flex;
   flex-direction: column;
-  height: full;
+  height: 100%;
+  min-height: 100vh;
   width: 100%;
   position: relative;
   overflow: hidden;
@@ -31,7 +33,7 @@ h1 {
   font-size: 2em;
   z-index: 10;
   position: relative;
-  height: 5%;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,26 +43,24 @@ h1 {
 .content-container {
   display: flex;
   flex-direction: row;
-  height: 85%;
+  flex: 1;
   width: 100%;
   gap: 15px;
-  padding: 0 15px;
-  flex-shrink: 0;
-  max-height: 85vh;
+  padding: 0 15px 70px 15px; /* Bottom padding for tabs */
+  min-height: 0;
+  overflow: hidden;
 }
 
 .fractal-container {
   flex: 1;
-  height: 100%;
   display: flex;
-  max-height: 100%;
+  min-height: 0;
 }
 
 .description-container {
   flex: 1;
-  height: 100%;
   display: flex;
-  max-height: 100%;
+  min-height: 0;
 }
 
 canvas {
@@ -70,7 +70,7 @@ canvas {
   border: 3px solid #45a29e;
   border-radius: 15px;
   box-shadow: 0 0 30px rgba(69, 162, 158, 0.4);
-  max-height: 100%;
+  min-height: 0;
 }
 
 .info-container {
@@ -85,7 +85,7 @@ canvas {
   display: flex;
   flex-direction: column;
   backdrop-filter: blur(10px);
-  max-height: 100%;
+  min-height: 0;
 }
 
 .info-container h2 {
@@ -110,11 +110,11 @@ canvas {
 }
 
 .tabs {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 10%;
+  height: 60px;
   display: flex;
   overflow-x: auto;
   white-space: nowrap;
@@ -125,7 +125,6 @@ canvas {
   z-index: 1000;
   box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
   align-items: center;
-  flex-shrink: 0;
 }
 
 .tabs::-webkit-scrollbar {
@@ -135,8 +134,8 @@ canvas {
 .tab {
   background: linear-gradient(135deg, #0b0c10 0%, #1f2833 100%);
   color: #66fcf1;
-  padding: 12px 20px;
-  margin-right: 12px;
+  padding: 10px 18px;
+  margin-right: 10px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -146,7 +145,10 @@ canvas {
   font-size: 0.9em;
   min-width: 120px;
   text-align: center;
-  height: fit-content;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tab:hover {
@@ -186,38 +188,37 @@ canvas {
 @media (max-width: 768px) {
   h1 {
     font-size: 1.7em;
-    height: 5%;
+    height: 40px;
     margin: 5px 0;
   }
 
   .content-container {
     flex-direction: column;
-    height: 85%;
-    padding: 0 10px;
+    padding: 0 10px 70px 10px;
     gap: 10px;
-    max-height: 85vh;
   }
 
   .fractal-container {
-    height: 45%;
-    max-height: 45%;
+    flex: 1;
+    min-height: 200px;
   }
 
   .description-container {
-    height: 45%;
-    max-height: 45%;
+    flex: 1;
+    min-height: 200px;
   }
 
   .tabs {
-    height: 10%;
+    height: 60px;
     padding: 8px 10px;
   }
 
   .tab {
-    padding: 10px 16px;
+    padding: 8px 14px;
     min-width: 100px;
     font-size: 0.85em;
     margin-right: 8px;
+    height: 36px;
   }
 
   .info-container {
@@ -233,15 +234,21 @@ canvas {
 @media (max-width: 480px) {
   h1 {
     font-size: 1.5em;
+    height: 35px;
   }
   
   .content-container {
-    padding: 0 5px;
+    padding: 0 5px 65px 5px;
   }
   
   .tab {
-    padding: 8px 12px;
+    padding: 6px 12px;
     min-width: 90px;
     font-size: 0.8em;
+    height: 34px;
+  }
+  
+  .tabs {
+    height: 55px;
   }
 }
