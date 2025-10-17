@@ -8,6 +8,7 @@
         "xₙ₊₁ = (xₙ + vₓ) / 2",
         "yₙ₊₁ = (yₙ + v_y) / 2"
       ],
+      "type": "chaosGame",
       "vertices": [
         { "xRatio": 0.5, "yRatio": 0.05 },
         { "xRatio": 0.05, "yRatio": 0.95 },
@@ -17,12 +18,13 @@
     {
       "id": "square",
       "name": "Chaos Game - Square",
-      "description": "Instead of a triangle, we choose from four vertices of a square and move halfway each time. We skip repeating the same vertex twice to produce a fractal-like cross pattern.",
+      "description": "Using four vertices of a square, we move halfway toward a random vertex but avoid repeating the same one consecutively.",
       "formulas": [
         "xₙ₊₁ = (xₙ + vₓ) / 2",
         "yₙ₊₁ = (yₙ + v_y) / 2",
         "Skip if vertex = previous"
       ],
+      "type": "chaosGame",
       "vertices": [
         { "xRatio": 0.1, "yRatio": 0.1 },
         { "xRatio": 0.9, "yRatio": 0.1 },
@@ -33,13 +35,65 @@
     {
       "id": "fern",
       "name": "Barnsley Fern",
-      "description": "A fractal resembling a natural fern, generated using four affine transformations with given probabilities.",
+      "description": "A fractal resembling a natural fern, generated using four affine transformations with specific probabilities.",
       "formulas": [
         "f₁(x, y): xₙ₊₁ = 0, yₙ₊₁ = 0.16y (p=1%)",
         "f₂(x, y): xₙ₊₁ = 0.85x + 0.04y, yₙ₊₁ = -0.04x + 0.85y + 1.6 (p=85%)",
         "f₃(x, y): xₙ₊₁ = 0.20x - 0.26y, yₙ₊₁ = 0.23x + 0.22y + 1.6 (p=7%)",
         "f₄(x, y): xₙ₊₁ = -0.15x + 0.28y, yₙ₊₁ = 0.26x + 0.24y + 0.44 (p=7%)"
-      ]
+      ],
+      "type": "fern"
+    },
+    {
+      "id": "koch",
+      "name": "Koch Snowflake",
+      "description": "A recursive fractal formed by repeatedly subdividing each line segment into four parts and replacing the middle one with two sides of an equilateral triangle.",
+      "formulas": [
+        "Start with an equilateral triangle.",
+        "Each iteration replaces each segment with 4 smaller segments at 60° angles."
+      ],
+      "type": "koch"
+    },
+    {
+      "id": "dragon",
+      "name": "Dragon Curve",
+      "description": "A self-similar fractal formed by repeatedly folding a strip of paper and unfolding it at right angles.",
+      "formulas": [
+        "Turn left, draw, turn right, draw.",
+        "Recursively repeat with alternating directions."
+      ],
+      "type": "dragon"
+    },
+    {
+      "id": "tree",
+      "name": "Pythagoras Tree",
+      "description": "A plane fractal constructed from squares, each spawning two smaller squares at 45° angles.",
+      "formulas": [
+        "Draw base square.",
+        "Spawn two smaller squares at the top corners rotated ±45°."
+      ],
+      "type": "tree"
+    },
+    {
+      "id": "hilbert",
+      "name": "Hilbert Curve",
+      "description": "A continuous fractal space-filling curve that passes through every point in a grid once.",
+      "formulas": [
+        "Recursive L-system:",
+        "A → +BF-AFA-FB+",
+        "B → -AF+BFB+FA-"
+      ],
+      "type": "hilbert"
+    },
+    {
+      "id": "mandelbrot",
+      "name": "Mandelbrot Set",
+      "description": "A famous fractal defined in the complex plane by iterating z = z² + c and determining whether the sequence remains bounded.",
+      "formulas": [
+        "zₙ₊₁ = zₙ² + c",
+        "If |zₙ| > 2, point escapes"
+      ],
+      "type": "mandelbrot"
     }
   ]
 }
