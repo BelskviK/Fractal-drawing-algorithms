@@ -16,11 +16,9 @@ body {
   align-items: center;
   flex: 1;
   width: 100%;
-  max-width: 700px;
-  padding: 10px;
-  overflow: hidden;
-  box-sizing: border-box;
+  max-width: 900px;
   position: relative;
+  overflow: hidden;
 }
 
 h1 {
@@ -29,12 +27,105 @@ h1 {
   text-shadow: 0 0 5px #45a29e;
 }
 
-/* Canvas */
+.fractal-flex {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
 canvas {
+  flex: 1;
   background-color: #1f2833;
   border: 2px solid #45a29e;
   border-radius: 10px;
-  width: 100%;
+  box-shadow: 0 0 20px rgba(69, 162, 158, 0.3);
+}
+
+.info-container {
+  flex: 1;
+  background-color: #1f2833;
+  border: 2px solid #45a29e;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(69, 162, 158, 0.2);
+  padding: 12px 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.info-container h2 {
+  color: #66fcf1;
+  margin: 0 0 5px 0;
+}
+
+.info-container code {
+  display: block;
+  background-color: #0b0c10;
+  color: #66fcf1;
+  padding: 3px 6px;
+  margin: 2px 0;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+}
+
+/* Tabs fixed at bottom */
+.tabs {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  background-color: #1f2833;
+  border-top: 2px solid #45a29e;
+  padding: 10px;
+  scrollbar-width: none;
+  z-index: 20;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  background-color: #0b0c10;
+  color: #66fcf1;
+  padding: 8px 14px;
+  margin-right: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.tab:hover,
+.tab.active {
+  background-color: #45a29e;
+  color: #0b0c10;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .fractal-flex {
+    flex-direction: column;
+  }
+
+  canvas {
+    width: 100%;
+    height: 60vh;
+  }
+
+  .info-container {
+    max-height: 40vh;
+  }
+}  width: 100%;
   height: auto;
   flex: 1;
   max-height: 60vh;
