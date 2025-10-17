@@ -120,55 +120,63 @@ function drawChaosGame(fractal) {
   }));
   
   // Initial random point
-  let currentPoint = { 
-    x: Math.random() * w, 
-    y: Math.random() * h 
-  };
+  let currentPoint = getBetterStartPoint(vertices, w, h);
   
   let lastVertexIndex = -1;
   const ratio = fractal.ratio || 0.5; // Default to 0.5 if not specified
   
-  // Draw vertex markers
-  vertices.forEach(vertex => {
+  // Draw vertex markers with improved styling
+  vertices.forEach((vertex, index) => {
     ctx.fillStyle = '#45a29e';
-    ctx.fillRect(vertex.x - 2, vertex.y - 2, 4, 4);
+    ctx.beginPath();
+    ctx.arc(vertex.x, vertex.y, 4, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Add vertex numbers for debugging
+    ctx.fillStyle = '#66fcf1';
+    ctx.font = '12px Arial';
+    ctx.fillText(index + 1, vertex.x + 6, vertex.y + 4);
   });
 
   function iterate() {
-    const iterationsPerFrame = 500; // Performance tuning
+    const iterationsPerFrame = fractal.id === 'sierpinski_carpet' ? 200 : 500;
     
     for (let i = 0; i < iterationsPerFrame; i++) {
       let vertexIndex;
+      let attempts = 0;
+      const maxAttempts = 100;
       
-      // Apply restrictions from JSON rules
-      if (fractal.skipRepeat) {
-        // Cannot choose same vertex twice in a row
-        do {
-          vertexIndex = Math.floor(Math.random() * vertices.length);
-        } while (vertexIndex === lastVertexIndex);
-      } else if (fractal.skipAdjacent) {
-        // Cannot choose adjacent vertices (for crystal growth)
-        do {
-          vertexIndex = Math.floor(Math.random() * vertices.length);
-        } while (
-          Math.abs(vertexIndex - lastVertexIndex) <= 1 || 
-          Math.abs(vertexIndex - lastVertexIndex) >= vertices.length - 1
-        );
-      } else {
-        // No restrictions - random choice
+      // Apply restrictions from JSON rules with proper fallbacks
+      do {
         vertexIndex = Math.floor(Math.random() * vertices.length);
-      }
+        attempts++;
+        
+        if (attempts > maxAttempts) {
+          break;
+        }
+        
+      } while (!isValidVertexChoice(vertexIndex, lastVertexIndex, fractal, vertices.length));
       
       lastVertexIndex = vertexIndex;
       const targetVertex = vertices[vertexIndex];
       
-      // Move toward target vertex using ratio from JSON
-      currentPoint.x = currentPoint.x * (1 - ratio) + targetVertex.x * ratio;
-      currentPoint.y = currentPoint.y * (1 - ratio) + targetVertex.y * ratio;
+      // Apply special transformations for certain fractals
+      if (fractal.id === 'koch') {
+        applyKochTransformation(currentPoint, targetVertex, vertexIndex, ratio);
+      } else {
+        // Standard chaos game movement
+        currentPoint.x = currentPoint.x * (1 - ratio) + targetVertex.x * ratio;
+        currentPoint.y = currentPoint.y * (1 - ratio) + targetVertex.y * ratio;
+      }
       
-      // Color based on vertex for visual variety
-      const hue = (vertexIndex / vertices.length) * 360;
-      ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+      // Apply Sierpinski carpet center skipping
+      if (fractal.skipCenter && isInCenterRegion(currentPoint, w, h)) {
+        continue;
+      }
+      
+      // Enhanced coloring based on fractal type and position
+      const color = getPointColor(fractal, vertexIndex, vertices.length, currentPoint, w, h);
+      ctx.fillStyle = color;
       ctx.fillRect(currentPoint.x, currentPoint.y, 1, 1);
     }
     
@@ -176,6 +184,98 @@ function drawChaosGame(fractal) {
   }
   
   iterate();
+}
+
+// Helper function to validate vertex choices based on fractal rules
+function isValidVertexChoice(currentIndex, lastIndex, fractal, totalVertices) {
+  if (lastIndex === -1) return true;
+  
+  if (fractal.skipRepeat) {
+    return currentIndex !== lastIndex;
+  }
+  
+  if (fractal.skipAdjacent) {
+    const diff = Math.abs(currentIndex - lastIndex);
+    return diff > 1 && diff < totalVertices - 1;
+  }
+  
+  if (fractal.skipOpposite) {
+    const oppositeIndex = (lastIndex + Math.floor(totalVertices / 2)) % totalVertices;
+    return currentIndex !== oppositeIndex;
+  }
+  
+  if (fractal.skipCenter) {
+    return true;
+  }
+  
+  return true;
+}
+
+// Special transformation for Koch snowflake
+function applyKochTransformation(currentPoint, targetVertex, vertexIndex, ratio) {
+  const angle = (vertexIndex / 6) * Math.PI * 2;
+  currentPoint.x = currentPoint.x + (targetVertex.x - currentPoint.x) * ratio;
+  currentPoint.y = currentPoint.y + (targetVertex.y - currentPoint.y) * ratio;
+}
+
+// Check if point is in center region (for Sierpinski carpet)
+function isInCenterRegion(point, width, height) {
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const regionSize = Math.min(width, height) / 3;
+  
+  return (
+    point.x > centerX - regionSize / 2 &&
+    point.x < centerX + regionSize / 2 &&
+    point.y > centerY - regionSize / 2 &&
+    point.y < centerY + regionSize / 2
+  );
+}
+
+// Enhanced coloring system
+function getPointColor(fractal, vertexIndex, totalVertices, point, width, height) {
+  const baseHue = (vertexIndex / totalVertices) * 360;
+  
+  switch (fractal.id) {
+    case 'triangle':
+      return `hsl(${baseHue}, 85%, 60%)`;
+    case 'square':
+      return `hsl(${140 + vertexIndex * 20}, 90%, 65%)`;
+    case 'pentagon':
+    case 'spiral':
+      const goldenHue = (point.x / width) * 360;
+      return `hsl(${goldenHue}, 80%, 60%)`;
+    case 'crystal':
+      return `hsl(${200 + vertexIndex * 10}, 85%, 65%)`;
+    case 'hexagon':
+      return `hsl(${baseHue}, 75%, 55%)`;
+    case 'dragon':
+      return `hsl(${30 + vertexIndex * 15}, 95%, 60%)`;
+    case 'koch':
+      return `hsl(${180 + vertexIndex * 5}, 70%, 70%)`;
+    case 'sierpinski_carpet':
+      const carpetHue = ((point.x + point.y) / (width + height)) * 360;
+      return `hsl(${carpetHue}, 80%, 50%)`;
+    default:
+      return `hsl(${baseHue}, 80%, 60%)`;
+  }
+}
+
+// Better random point generation
+function getBetterStartPoint(vertices, width, height) {
+  if (vertices.length >= 3) {
+    const centerX = vertices.reduce((sum, v) => sum + v.x, 0) / vertices.length;
+    const centerY = vertices.reduce((sum, v) => sum + v.y, 0) / vertices.length;
+    return {
+      x: centerX + (Math.random() - 0.5) * width * 0.1,
+      y: centerY + (Math.random() - 0.5) * height * 0.1
+    };
+  }
+  
+  return {
+    x: Math.random() * width,
+    y: Math.random() * height
+  };
 }
 
 // Generic Affine Chaos drawer - uses rules from JSON
@@ -196,7 +296,7 @@ function drawAffineChaos(fractal) {
     for (let i = 0; i < iterationsPerFrame; i++) {
       const randomValue = Math.random();
       let probabilitySum = 0;
-      let selectedRule = rules[rules.length - 1]; // Default to last rule
+      let selectedRule = rules[rules.length - 1];
       
       // Select rule based on probability from JSON
       for (const rule of rules) {
