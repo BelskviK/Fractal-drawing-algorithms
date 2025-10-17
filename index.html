@@ -7,17 +7,19 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Fractal Explorer</h1>
+  <div class="main-container">
+    <h1>Fractal Explorer</h1>
 
-  <div id="tabContainer" class="tabs"></div>
+    <canvas id="chaosCanvas" width="600" height="600"></canvas>
 
-  <div id="infoContainer" class="info-container">
-    <h2 id="fractName"></h2>
-    <p id="fractDesc"></p>
-    <div id="formulas"></div>
+    <div id="infoContainer" class="info-container">
+      <h2 id="fractName"></h2>
+      <div id="fractDesc"></div>
+      <div id="formulas"></div>
+    </div>
   </div>
 
-  <canvas id="chaosCanvas" width="600" height="600"></canvas>
+  <div id="tabContainer" class="tabs"></div>
 
   <script src="script.js"></script>
 </body>
