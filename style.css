@@ -46,7 +46,7 @@ h1 {
   flex: 1;
   width: 100%;
   gap: 15px;
-  padding: 0 15px 70px 15px; /* Bottom padding for tabs */
+  padding: 0 15px 80px 15px; /* Extra bottom padding for tabs */
   min-height: 0;
   overflow: hidden;
 }
@@ -194,7 +194,7 @@ canvas {
 
   .content-container {
     flex-direction: column;
-    padding: 0 10px 70px 10px;
+    padding: 0 10px 80px 10px;
     gap: 10px;
   }
 
@@ -238,7 +238,7 @@ canvas {
   }
   
   .content-container {
-    padding: 0 5px 65px 5px;
+    padding: 0 5px 80px 5px;
   }
   
   .tab {
@@ -249,6 +249,6 @@ canvas {
   }
   
   .tabs {
-    height: 55px;
+    height: 60px;
   }
 }
