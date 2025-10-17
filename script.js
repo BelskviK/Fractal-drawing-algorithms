@@ -5,6 +5,9 @@ const fractDesc = document.getElementById('fractDesc');
 const formulasDiv = document.getElementById('formulas');
 const tabContainer = document.getElementById('tabContainer');
 
+canvas.width = 500;
+canvas.height = 500;
+
 let fractals = [];
 let animationId;
 
@@ -17,7 +20,7 @@ fetch('fractals.json')
     loadFractal(fractals[0]);
   });
 
-// Create bottom tabs
+// Tabs
 function createTabs() {
   fractals.forEach(fractal => {
     const tab = document.createElement('div');
@@ -33,48 +36,153 @@ function createTabs() {
   tabContainer.firstChild.classList.add('active');
 }
 
-// Load fractal data and draw
+// Load fractal by type
 function loadFractal(fractal) {
   cancelAnimationFrame(animationId);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   fractName.textContent = fractal.name;
   fractDesc.textContent = fractal.description;
   formulasDiv.innerHTML = fractal.formulas.map(f => `<code>${f}</code>`).join('');
 
-  if (fractal.id === 'fern') drawFern();
-  else drawChaosGame(fractal);
+  switch (fractal.type) {
+    case 'chaosGame':
+      drawChaosGame(fractal);
+      break;
+    case 'fern':
+      drawFern();
+      break;
+    case 'koch':
+      drawKochSnowflake();
+      break;
+    case 'dragon':
+      drawDragonCurve();
+      break;
+    case 'tree':
+      drawPythagorasTree();
+      break;
+    case 'hilbert':
+      drawHilbertCurve();
+      break;
+    case 'mandelbrot':
+      drawMandelbrot();
+      break;
+  }
 }
 
-// === Chaos Game for triangle/square ===
+// === CHAOS GAME (Triangle/Square) ===
 function drawChaosGame(fractal) {
-  const { vertices } = fractal;
-  const width = canvas.width;
-  const height = canvas.height;
-
-  const points = vertices.map(v => ({
+  const width = canvas.width, height = canvas.height;
+  const points = fractal.vertices.map(v => ({
     x: v.xRatio * width,
     y: v.yRatio * height
   }));
-
   let p = { x: Math.random() * width, y: Math.random() * height };
-  let lastTarget = -1;
+  let last = -1;
 
-  function drawStep() {
+  points.forEach(v => {
+    ctx.fillStyle = '#45a29e';
+    ctx.fillRect(v.x - 1, v.y - 1, 3, 3);
+  });
+
+  function step() {
     for (let i = 0; i < 1000; i++) {
-      let targetIndex;
-      do {
-        targetIndex = Math.floor(Math.random() * points.length);
-      } while (fractal.id === 'square' && targetIndex === lastTarget);
-      lastTarget = targetIndex;
-
-      const target = points[targetIndex];
-      p.x = (p.x + target.x) / 2;
-      p.y = (p.y + target.y) / 2;
-
+      let idx;
+      do { idx = Math.floor(Math.random() * points.length); }
+      while (fractal.id === 'square' && idx === last);
+      last = idx;
+      const t = points[idx];
+      p.x = (p.x + t.x) / 2;
+      p.y = (p.y + t.y) / 2;
       ctx.fillStyle = '#66fcf1';
       ctx.fillRect(p.x, p.y, 1, 1);
     }
+    animationId = requestAnimationFrame(step);
+  }
+  step();
+}
+
+// === Barnsley Fern ===
+function drawFern() {
+  let x = 0, y = 0;
+  function iter() {
+    for (let i = 0; i < 2000; i++) {
+      const r = Math.random();
+      let nx, ny;
+      if (r < 0.01) { nx = 0; ny = 0.16 * y; }
+      else if (r < 0.86) { nx = 0.85 * x + 0.04 * y; ny = -0.04 * x + 0.85 * y + 1.6; }
+      else if (r < 0.93) { nx = 0.20 * x - 0.26 * y; ny = 0.23 * x + 0.22 * y + 1.6; }
+      else { nx = -0.15 * x + 0.28 * y; ny = 0.26 * x + 0.24 * y + 0.44; }
+      x = nx; y = ny;
+      ctx.fillStyle = '#66fcf1';
+      ctx.fillRect(canvas.width/2 + x*50, canvas.height - y*50, 1, 1);
+    }
+    animationId = requestAnimationFrame(iter);
+  }
+  iter();
+}
+
+// === Koch Snowflake ===
+function drawKochSnowflake(iter = 4) {
+  function koch(p1, p2, n) {
+    if (n === 0) {
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+      return;
+    }
+    const dx = (p2.x - p1.x) / 3;
+    const dy = (p2.y - p1.y) / 3;
+    const a = { x: p1.x + dx, y: p1.y + dy };
+    const b = { x: p1.x + 2 * dx, y: p1.y + 2 * dy };
+    const angle = Math.PI / 3;
+    const cx = a.x + Math.cos(angle) * dx - Math.sin(angle) * dy;
+    const cy = a.y + Math.sin(angle) * dx + Math.cos(angle) * dy;
+    const c = { x: cx, y: cy };
+    koch(p1, a, n - 1);
+    koch(a, c, n - 1);
+    koch(c, b, n - 1);
+    koch(b, p2, n - 1);
+  }
+  ctx.strokeStyle = '#66fcf1';
+  const p1 = { x: 100, y: 400 }, p2 = { x: 400, y: 400 }, p3 = { x: 250, y: 400 - Math.sqrt(3)*150 };
+  koch(p1, p2, iter);
+  koch(p2, p3, iter);
+  koch(p3, p1, iter);
+}
+
+// === Dragon Curve ===
+function drawDragonCurve() {
+  let points = [{x:250,y:250},{x:350,y:250}];
+  ctx.strokeStyle = '#66fcf1';
+  for(let i=0;i<14;i++){
+    const newPts=[];
+    for(let j=0;j<points.length-1;j++){
+      const a=points[j],b=points[j+1];
+      const mid={x:(a.x+b.x)/2+(b.y-a.y)/2,y:(a.y+b.y)/2-(b.x-a.x)/2};
+      newPts.push(a,mid);
+    }
+    newPts.push(points[points.length-1]);
+    points=newPts;
+  }
+  ctx.beginPath();
+  for(let i=0;i<points.length-1;i++){ctx.moveTo(points[i].x,points[i].y);ctx.lineTo(points[i+1].x,points[i+1].y);}
+  ctx.stroke();
+}
+
+// === Pythagoras Tree ===
+function drawPythagorasTree(x=250,y=450,size=60,angle=-Math.PI/2,depth=8){
+  if(depth===0)return;
+  const x1=x+Math.cos(angle)*size;
+  const y1=y+Math.sin(angle)*size;
+  ctx.strokeStyle='#66fcf1';
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x1,y1);ctx.stroke();
+  drawPythagorasTree(x1,y1,size*0.7,angle-Math.PI/6,depth-1);
+  drawPythagorasTree(x1,y1,size*0.7,angle+Math.PI/6,depth-1);
+}
+
+// === Hilbert Curve (recursive) ===
+function drawHilbertCurve(order=5){    }
     animationId = requestAnimationFrame(drawStep);
   }
 
