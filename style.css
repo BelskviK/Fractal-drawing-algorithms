@@ -171,6 +171,7 @@ canvas {
 }
 
 @media (max-width: 768px) {
+@media (max-width: 768px) {
   h1 {
     font-size: 2em;
     margin: 10px 0;
@@ -178,7 +179,7 @@ canvas {
   
   .fractal-flex {
     flex-direction: column;
-    padding: 0 10px 70px 10px;
+    padding: 0 10px 20px 10px; /* Normal bottom padding */
     gap: 15px;
   }
 
@@ -190,11 +191,16 @@ canvas {
   .info-container {
     flex: 4;
     max-width: none;
-    max-height: 35vh;
+    max-height: 25vh; /* Reduced height */
+    order: 3; /* Move description to bottom */
   }
   
   .tabs {
-    padding: 12px 15px;
+    position: relative; /* Remove fixed positioning */
+    order: 2; /* Place tabs between canvas and description */
+    margin: 10px 0;
+    border-radius: 12px;
+    border: 2px solid #45a29e;
   }
   
   .tab {
