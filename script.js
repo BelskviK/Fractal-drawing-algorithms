@@ -1,76 +1,120 @@
 const canvas = document.getElementById('chaosCanvas');
 const ctx = canvas.getContext('2d');
-const speedBtn = document.getElementById('speedBtn');
-const width = canvas.width;
-const height = canvas.height;
+const infoContainer = document.getElementById('infoContainer');
+const fractName = document.getElementById('fractName');
+const fractDesc = document.getElementById('fractDesc');
+const formulasDiv = document.getElementById('formulas');
+const tabContainer = document.getElementById('tabContainer');
 
-let speedLevel = 1; // range 0–10
-let intervalId;
+let fractals = [];
+let currentFractal = null;
+let animationId;
 
-// Define triangle vertices
-const vertices = [
-  { x: width / 2, y: 20 },        // top
-  { x: 20, y: height - 20 },      // bottom-left
-  { x: width - 20, y: height - 20 } // bottom-right
-];
+// Load JSON file
+fetch('fractals.json')
+  .then(res => res.json())
+  .then(data => {
+    fractals = data.fractals;
+    createTabs();
+    loadFractal(fractals[0]);
+  });
 
-// Start with a random point
-let point = randomPoint();
-
-function randomPoint() {
-  return { x: Math.random() * width, y: Math.random() * height };
+// Create scrollable tabs
+function createTabs() {
+  fractals.forEach(fractal => {
+    const tab = document.createElement('div');
+    tab.textContent = fractal.name;
+    tab.classList.add('tab');
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      loadFractal(fractal);
+    });
+    tabContainer.appendChild(tab);
+  });
+  tabContainer.firstChild.classList.add('active');
 }
 
-function drawPoint(x, y, color = '#66fcf1') {
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y, 1, 1);
+// Load fractal info + draw
+function loadFractal(fractal) {
+  cancelAnimationFrame(animationId);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  currentFractal = fractal;
+
+  fractName.textContent = fractal.name;
+  fractDesc.textContent = fractal.description;
+  formulasDiv.innerHTML = fractal.formulas
+    .map(f => `<code>${f}</code>`)
+    .join('<br>');
+
+  if (fractal.id === 'fern') drawFern();
+  else drawChaosGame(fractal);
 }
 
-function drawVertices() {
-  vertices.forEach(v => drawPoint(v.x, v.y, '#45a29e'));
-}
+// === CHAOS GAME (triangle/square) ===
+function drawChaosGame(fractal) {
+  const { vertices } = fractal;
+  const width = canvas.width;
+  const height = canvas.height;
 
-function resetCanvas() {
-  ctx.clearRect(0, 0, width, height);
-  drawVertices();
-  point = randomPoint();
-}
+  const points = vertices.map(v => ({
+    x: v.xRatio * width,
+    y: v.yRatio * height
+  }));
 
-function chaosGameStep() {
-  for (let i = 0; i < 500; i++) {
-    const target = vertices[Math.floor(Math.random() * 3)];
-    point.x = (point.x + target.x) / 2;
-    point.y = (point.y + target.y) / 2;
-    drawPoint(point.x, point.y);
-  }
-}
+  let p = { x: Math.random() * width, y: Math.random() * height };
 
-function startChaosGame() {
-  clearInterval(intervalId);
-
-  const delay = speedLevel * 1000; // 0–10 sec delay
-  if (delay === 0) {
-    // Fast mode (continuous)
-    function loop() {
-      chaosGameStep();
-      requestAnimationFrame(loop);
+  function drawStep() {
+    for (let i = 0; i < 1000; i++) {
+      const target = points[Math.floor(Math.random() * points.length)];
+      p.x = (p.x + target.x) / 2;
+      p.y = (p.y + target.y) / 2;
+      ctx.fillStyle = '#66fcf1';
+      ctx.fillRect(p.x, p.y, 1, 1);
     }
-    loop();
-  } else {
-    intervalId = setInterval(chaosGameStep, delay);
+    animationId = requestAnimationFrame(drawStep);
   }
+
+  points.forEach(v => {
+    ctx.fillStyle = '#45a29e';
+    ctx.fillRect(v.x, v.y, 2, 2);
+  });
+
+  drawStep();
 }
 
-speedBtn.addEventListener('click', () => {
-  speedLevel = (speedLevel + 1) % 11; // loop 0–10
-  speedBtn.textContent = `Speed: ${speedLevel}x`;
-  resetCanvas();
-  startChaosGame();
-});
+// === BARNSLEY FERN ===
+function drawFern() {
+  let x = 0, y = 0;
 
-// Initial draw
-drawVertices();
-startChaosGame();                                    vertices.forEach(v => drawPoint(v.x, v.y, '#45a29e'));
+  function iterate() {
+    for (let i = 0; i < 2000; i++) {
+      const r = Math.random();
+      let nextX, nextY;
 
-                                    // Start animation
-                                    chaosGame();
+      if (r < 0.01) {
+        nextX = 0;
+        nextY = 0.16 * y;
+      } else if (r < 0.86) {
+        nextX = 0.85 * x + 0.04 * y;
+        nextY = -0.04 * x + 0.85 * y + 1.6;
+      } else if (r < 0.93) {
+        nextX = 0.20 * x - 0.26 * y;
+        nextY = 0.23 * x + 0.22 * y + 1.6;
+      } else {
+        nextX = -0.15 * x + 0.28 * y;
+        nextY = 0.26 * x + 0.24 * y + 0.44;
+      }
+
+      x = nextX;
+      y = nextY;
+      const px = canvas.width / 2 + x * 50;
+      const py = canvas.height - y * 50;
+      ctx.fillStyle = '#66fcf1';
+      ctx.fillRect(px, py, 1, 1);
+    }
+    animationId = requestAnimationFrame(iterate);
+  }
+
+  iterate();
+}
