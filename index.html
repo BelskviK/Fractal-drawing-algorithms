@@ -3,13 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chaos Game - Sierpinski Triangle</title>
+  <title>Fractal Explorer</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Chaos Game - Sierpinski Triangle</h1>
-  <button id="speedBtn">Speed: 1x</button>
+  <h1>Fractal Explorer</h1>
+
+  <div id="tabContainer" class="tabs"></div>
+
+  <div id="infoContainer" class="info-container">
+    <h2 id="fractName"></h2>
+    <p id="fractDesc"></p>
+    <div id="formulas"></div>
+  </div>
+
   <canvas id="chaosCanvas" width="600" height="600"></canvas>
+
   <script src="script.js"></script>
 </body>
 </html>
