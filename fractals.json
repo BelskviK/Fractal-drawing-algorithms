@@ -17,10 +17,11 @@
     {
       "id": "square",
       "name": "Chaos Game - Square",
-      "description": "Instead of a triangle, we choose from four vertices of a square and move halfway each time.",
+      "description": "Instead of a triangle, we choose from four vertices of a square and move halfway each time. We skip repeating the same vertex twice to produce a fractal-like cross pattern.",
       "formulas": [
         "xₙ₊₁ = (xₙ + vₓ) / 2",
-        "yₙ₊₁ = (yₙ + v_y) / 2"
+        "yₙ₊₁ = (yₙ + v_y) / 2",
+        "Skip if vertex = previous"
       ],
       "vertices": [
         { "xRatio": 0.1, "yRatio": 0.1 },
@@ -32,7 +33,7 @@
     {
       "id": "fern",
       "name": "Barnsley Fern",
-      "description": "A fractal that resembles a natural fern, generated using four affine transformations with specific probabilities.",
+      "description": "A fractal resembling a natural fern, generated using four affine transformations with given probabilities.",
       "formulas": [
         "f₁(x, y): xₙ₊₁ = 0, yₙ₊₁ = 0.16y (p=1%)",
         "f₂(x, y): xₙ₊₁ = 0.85x + 0.04y, yₙ₊₁ = -0.04x + 0.85y + 1.6 (p=85%)",
